@@ -1,0 +1,26 @@
+{
+    "textures":
+    [{
+        "image": "monster5_chew.png",
+        "format": "RGBA8888",
+        "size": {"w": 728, "h": 318},
+        "scale": 1, 
+        "frames": 
+            [{
+                "filename": "chew_1.png",
+                "rotated": false,
+                "trimmed": false,
+                "sourceSize": {"w": 364, "h": 318},
+                "spriteSourceSize": {"x": 0, "y": 0, "w": 364, "h": 318},
+                "frame": {"x": 0, "y": 0, "w": 364, "h": 318}
+            },
+            {
+                "filename": "chew_2.png",
+                "rotated": false,
+                "trimmed": false,
+                "sourceSize": {"w": 364, "h": 318},
+                "spriteSourceSize": {"x": 0, "y": 0, "w": 364, "h": 318},
+                "frame": {"x": 364, "y": 0, "w": 364, "h": 318}
+            }]
+    }]
+}
