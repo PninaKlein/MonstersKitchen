@@ -34,7 +34,7 @@ class GameScreen extends Phaser.Scene {
             };
         });
 
-        Object.keys(gamestate.food).forEach(foodItem=>{
+        Object.keys(food_list).forEach(foodItem=>{
             this.load.image(foodItem, "images/food/" + foodItem+".png")
         })
     };
@@ -67,7 +67,6 @@ class GameScreen extends Phaser.Scene {
             gamestate.animations[curr_monster].on("animationcomplete", ()=>{
                 gamestate.animations[curr_monster].setVisible(false);
                 gamestate.reactionAudio[gamestate.currentMonster][gamestate.result].play();
-                console.log(gamestate.reactionAudio[gamestate.currentMonster][gamestate.result])
                 gamestate.soundplaying=true;
                 gamestate.done=true;
                 gamestate.monsters[gamestate.currentMonster].forEach(item=>{
@@ -87,7 +86,6 @@ class GameScreen extends Phaser.Scene {
                 gamestate.reactionAudio[curr_monster][gamestate.pos[j]]= this.sound.add("monster"+i+gamestate.pos[j]).on("complete", function(){
                     gamestate.soundplaying=false;
                     if(gamestate.num==5 && gamestate.try==6){
-                        console.log("start next")
                         game.scene.stop("GameScreen");
                         game.scene.start("QuestionScreen1");
                     }
@@ -106,27 +104,21 @@ class GameScreen extends Phaser.Scene {
                 }
                 img.on("pointerdown", function(){
                     if(gamestate.pressed.length!=0 && !gamestate.soundplaying){
-                        let curr= gamestate.food[gamestate.pressed[0].name];
-                        let curr_type= curr["attributes"]["type"]; 
-                        let curr_size= curr["attributes"]["size"];
-                        let curr_color= curr["attributes"]["color"];
-                        if(gamestate.monsterLikes== null){
-                            gamestate.monsterLikes= findLikes(gamestate.pressed[0]);
-                            console.log(gamestate.monsterLikes)
-                        }
-                        const speedX= (img.x-gamestate.pressed[0].x)/50;
-                        const speedY= (img.y-gamestate.pressed[0].y)/50;
-                        gamestate.move[name]= [gamestate.pressed[0], img.x, img.y, speedX, speedY];
-                        let preferance= gamestate.monsterLikes;
-                        if(curr_type==preferance["type"] && curr_color==preferance["color"] && curr_size==preferance["size"]){
-                            gamestate.result= "tasty";
-                        }
-                        else if(curr_type!=preferance["type"] && curr_color!=preferance["color"] && curr_size!=preferance["size"]){
+                        let item_name= gamestate.pressed[0].name;
+                        console.log(gamestate.possibleLikedFood)
+                        let possibilities_list= Object.keys(gamestate.possibleLikedFood);
+                        if(!possibilities_list.includes(item_name)){
+                            // not possibe for the monster to like this item 
                             gamestate.result= "bad";
                         }
                         else{
-                            gamestate.result= "ok";
+                            gamestate.monsterLikes= findLikes(gamestate.pressed[0]);
                         }
+                        console.log(gamestate.result);
+                        console.log(gamestate.monsterLikes);
+                        const speedX= (img.x-gamestate.pressed[0].x)/50;
+                        const speedY= (img.y-gamestate.pressed[0].y)/50;
+                        gamestate.move[name]= [gamestate.pressed[0], img.x, img.y, speedX, speedY];
                     }
                 });
             }
@@ -151,8 +143,8 @@ class GameScreen extends Phaser.Scene {
             n++;
         })
         gamestate.foodItems=[];
-        Object.keys(gamestate.food).forEach(foodItem=>{
-            let curr= gamestate.food[foodItem]
+        Object.keys(food_list).forEach(foodItem=>{
+            let curr= food_list[foodItem]
             let posX= curr["pos"][0];
             let posY= curr["pos"][1];
             let disX= curr["size"][0];
@@ -187,13 +179,14 @@ class GameScreen extends Phaser.Scene {
         if(gamestate.try>5 && !gamestate.soundplaying){
             if(gamestate.num!=5){
                 gamestate.try=1;
+                gamestate.possibleLikedFood= food_list;
                 gamestate.monsters[gamestate.currentMonster].forEach(img=>{
                     img.setVisible(false);
                 })
                 gamestate.foodItems.forEach(item=>{
                     let name= item.name;
-                    item.x= gamestate.food[name]["pos"][0]*screenWidth;
-                    item.y= (1-gamestate.food[name]["pos"][1])*screenHeight;
+                    item.x= food_list[name]["pos"][0]*screenWidth;
+                    item.y= (1-food_list[name]["pos"][1])*screenHeight;
                     item.setVisible(true);
                 })
                 Object.keys(gamestate.small_att).forEach(item=>{
@@ -212,14 +205,11 @@ class GameScreen extends Phaser.Scene {
                 gamestate.pressed=[];
                 gamestate.monsterLikes=null;
             }
-            if(gamestate.num==5){
-
-            }
         }
 
         if(gamestate.done){
             gamestate.done=false;
-            let chosen_att= gamestate.food[gamestate.pressed[0].name]["attributes"];
+            let chosen_att= food_list[gamestate.pressed[0].name]["attributes"];
             gamestate.small_att[ "try"+gamestate.try+"_"+ chosen_att["type"] ].setVisible(true);
             gamestate.small_att[ "try"+gamestate.try+"_"+ chosen_att["size"] ].setVisible(true);
             gamestate.small_att[ "try"+gamestate.try+"_"+ chosen_att["color"] ].setVisible(true);
@@ -246,7 +236,6 @@ class GameScreen extends Phaser.Scene {
             })
         }
         if(gamestate.newMonster!=null){
-            console.log(gamestate.newMonster)
             gamestate.intro_audios[gamestate.currentMonster].play();
             gamestate.newMonster=null;
             gamestate.soundplaying=true;

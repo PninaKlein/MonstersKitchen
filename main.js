@@ -23,7 +23,7 @@ gamestate.attributes={
     "color": ["blue_purple", "green", "yellow_orange", "red"], 
     "size": ["small", "medium", "big"]
 };
-gamestate.food= food_list;
+gamestate.possibleLikedFood= food_list;
 gamestate.monsterLikes=null;
 gamestate.pressed=[];
 gamestate.soundplaying= false;
