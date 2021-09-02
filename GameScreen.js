@@ -44,7 +44,7 @@ class GameScreen extends Phaser.Scene {
         const screenWidth= window.innerWidth * window.devicePixelRatio;
 
         gamestate.newMonster= true;
-        gamestate.num=1; 
+        gamestate.num=5; 
         gamestate.currentMonster= "monster"+gamestate.num;
 
         this.add.image( 
@@ -101,26 +101,7 @@ class GameScreen extends Phaser.Scene {
                     small_mon.displayWidth*=0.2;
                     small_mon.setVisible(false);
                     gamestate.smallMonsters["try"+k+"_"+name]=small_mon;
-                }
-                img.on("pointerdown", function(){
-                    if(gamestate.pressed.length!=0 && !gamestate.soundplaying){
-                        let item_name= gamestate.pressed[0].name;
-                        console.log(gamestate.possibleLikedFood)
-                        let possibilities_list= Object.keys(gamestate.possibleLikedFood);
-                        if(!possibilities_list.includes(item_name)){
-                            // not possibe for the monster to like this item 
-                            gamestate.result= "bad";
-                        }
-                        else{
-                            gamestate.monsterLikes= findLikes(gamestate.pressed[0]);
-                        }
-                        console.log(gamestate.result);
-                        console.log(gamestate.monsterLikes);
-                        const speedX= (img.x-gamestate.pressed[0].x)/50;
-                        const speedY= (img.y-gamestate.pressed[0].y)/50;
-                        gamestate.move[name]= [gamestate.pressed[0], img.x, img.y, speedX, speedY];
-                    }
-                });
+                }              
             }
         }
         let n=1; 
@@ -156,7 +137,7 @@ class GameScreen extends Phaser.Scene {
             img.displayHeight= disY*screenHeight;
             img.setInteractive(); 
             img.on("pointerdown", function(){ 
-                gamestate.pressed[0]= img;         
+                // gamestate.pressed[0]= img;         
                 for(let i=0; i<gamestate.foodItems.length; i++){
                     gamestate.foodItems[i].clearTint();
                 };
@@ -170,6 +151,51 @@ class GameScreen extends Phaser.Scene {
                 gamestate.big_att[curr_color].setVisible(true);
                 gamestate.big_att[curr_type].setVisible(true);
                 gamestate.big_att[curr_size].setVisible(true);
+            });
+            
+            this.input.setDraggable(img);
+            //  The pointer has to move 16 pixels before it's considered as a drag
+            this.input.dragDistanceThreshold = 16;
+            this.input.on('dragstart', function (pointer, gameObject) {
+                for(let i=0; i<gamestate.foodItems.length; i++){
+                    gamestate.foodItems[i].clearTint();
+                };
+                gameObject.setTint(0xc4c2bc);
+            });
+            this.input.on('drag', function (pointer, gameObject, dragX, dragY) {
+                gameObject.x = dragX;
+                gameObject.y = dragY;
+            });
+            
+            this.input.on('dragend', function (pointer, gameObject) {
+                gamestate.pressed[0]= gameObject;
+                if(gameObject.x<= 0.25*screenWidth && gameObject.y>=0.67*screenHeight){
+                    if(!gamestate.soundplaying){
+                        let item_name= gameObject.name;
+                        console.log(gamestate.possibleLikedFood)
+                        let possibilities_list= Object.keys(gamestate.possibleLikedFood);
+                        if(!possibilities_list.includes(item_name)){
+                            // not possibe for the monster to like this item 
+                            gamestate.result= "bad";
+                        }
+                        else{
+                            gamestate.monsterLikes= findLikes(gameObject);
+                        }
+                        gameObject.setVisible(false);
+                        gamestate.monsters[gamestate.currentMonster].forEach(item=>{
+                            item.setVisible(false);
+                        })
+                        gamestate.animations[gamestate.currentMonster].setVisible(true);
+                        gamestate.animations[gamestate.currentMonster].play(gamestate.currentMonster+"_animate", true);
+                        gamestate.soundplaying=true;
+                    }
+                    else{
+                        reset(gameObject, screenWidth, screenHeight)
+                    }
+                }
+                else{
+                    reset(gameObject, screenWidth, screenHeight)
+                }
             });
         })
     };
@@ -215,25 +241,6 @@ class GameScreen extends Phaser.Scene {
             gamestate.small_att[ "try"+gamestate.try+"_"+ chosen_att["color"] ].setVisible(true);
             gamestate.smallMonsters["try"+gamestate.try+"_"+gamestate.currentMonster+"_"+gamestate.result].setVisible(true);
             gamestate.try+=1;
-        }
-        if(Object.keys(gamestate.move).length!=0){
-            Object.keys(gamestate.move).forEach(item=>{
-                let curr= gamestate.move[item]
-                if(curr[0].x>=curr[1]){
-                    curr[0].x+=curr[3];//speedX;
-                    curr[0].y+=curr[4]; //speedY;
-                }
-                else{
-                    curr[0].setVisible(false);
-                    gamestate.monsters[gamestate.currentMonster].forEach(item=>{
-                        item.setVisible(false);
-                    })
-                    gamestate.animations[gamestate.currentMonster].setVisible(true);
-                    gamestate.animations[gamestate.currentMonster].play(gamestate.currentMonster+"_animate", true);
-                    gamestate.soundplaying=true;
-                    gamestate.move= remove(gamestate.move, item);                    
-                }
-            })
         }
         if(gamestate.newMonster!=null){
             gamestate.intro_audios[gamestate.currentMonster].play();

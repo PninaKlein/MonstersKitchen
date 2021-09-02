@@ -21,7 +21,6 @@ function findLikes(foodItem){
         })
         options.push({"variability": for_calc.length, "preference": preference})
     })
-    console.log(options)
     let max_index= 0;
     let max_val= 0;
     for(let i=0; i<options.length; i++){
@@ -68,7 +67,6 @@ function findLikes(foodItem){
 
     })
     gamestate.possibleLikedFood= new_food_list;
-    console.log(gamestate.possibleLikedFood)
     return options[max_index]["preference"];
 }
 
@@ -137,4 +135,12 @@ function clicked(item, command){
         gamestate.attributes_off[name].setVisible(true);
         gamestate.guess.push(name);
     }
+}
+
+function reset(gameObject, screenWidth, screenHeight){
+    let dragged_item= food_list[gameObject.name];
+    let orig_x= dragged_item["pos"][0];
+    let orig_y= dragged_item["pos"][1];
+    gameObject.x= orig_x*screenWidth
+    gameObject.y= (1-orig_y)*screenHeight
 }
